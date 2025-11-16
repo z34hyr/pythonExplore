@@ -1,6 +1,8 @@
 
 from db.db_conn import DefaultSession
-from sqlalchemy import select, text
+from sqlalchemy import text
+
+from db.migrations import AlembicMigration
 
 def main():
     print('hello world')
@@ -10,4 +12,7 @@ def main():
         print(b)
 
 if __name__ == '__main__':
-    main()
+    ale = AlembicMigration()
+    # ale.create_revision('add comments', autogenerate=True)
+    ale.run_upgrade_db()
+    # ale.run_downgrade_db('93b679cc1542')
