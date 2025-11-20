@@ -1,8 +1,13 @@
+import logging
+logger = logging.getLogger('LOGGER')
+
 from logging.config import fileConfig
 
 from alembic import context
 
 from db.db_conn import ENGINE
+from sqlalchemy import text
+
 from models import Base
 from settings import DB_SCHEMA
 
@@ -13,7 +18,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -26,6 +31,11 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+def include_name(name, type_, parent_names):
+    if type_ == 'schema':
+        return name == DB_SCHEMA
+    else:
+        return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -39,7 +49,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    print('run it offline')
+    logger.info('Run it offline')
     url = config.get_main_option("sqlalchemy.url")
     context.is_offline_mode()
     context.configure(
@@ -60,7 +70,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    print('run it online')
+    logger.info('Run it online')
     connectable = ENGINE
 
     with connectable.connect() as connection:
@@ -71,8 +81,10 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            compare_type=True,
-            version_table_schema=DB_SCHEMA
+            version_table_schema=DB_SCHEMA,
+            compare_type=False,
+            compare_server_default=False,
+            include_name=include_name,
         )
 
         with context.begin_transaction():

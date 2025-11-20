@@ -1,5 +1,7 @@
 import os
 
+COMMON_LOGGER_NAME = 'LOGGER'
+
 DEBUG = os.getenv('DEBUG', True)
 
 DB_NAME = os.getenv('DB_NAME')
